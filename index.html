@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Malla Interactiva Ingeniería Civil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --rosa-claro: #fee3f3;
+      --rosa-pastel: #f8b7e7;
+      --rosa-oscuro: #e98fc9;
+      --gris: #f5f5f5;
+      --gris-texto: #555;
+      --tachado: #dc8fc5;
+    }
+    body {
+      background: var(--rosa-claro);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+    }
+    h1 {
+      text-align: center;
+      color: var(--rosa-oscuro);
+      margin: 30px 0 10px 0;
+      font-size: 2.2em;
+      letter-spacing: 1px;
+    }
+    .malla-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 50px;
+    }
+    .semestre {
+      background: var(--rosa-pastel);
+      border-radius: 18px;
+      box-shadow: 0 4px 14px rgba(233, 143, 201, 0.09);
+      padding: 18px 12px;
+      min-width: 230px;
+      max-width: 260px;
+      margin: 8px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .semestre-title {
+      color: var(--rosa-oscuro);
+      font-weight: bold;
+      font-size: 1.1em;
+      margin-bottom: 14px;
+      letter-spacing: 1px;
+    }
+    .materia {
+      background: #ffffff;
+      border: 2px solid var(--rosa-pastel);
+      border-radius: 9px;
+      box-shadow: 0 2px 7px rgba(248,183,231,0.05);
+      color: var(--gris-texto);
+      font-size: 1em;
+      margin: 7px 0;
+      padding: 12px;
+      cursor: pointer;
+      width: 90%;
+      text-align: left;
+      transition: background 0.2s, border 0.2s, color 0.2s;
+      opacity: 0.7;
+      position: relative;
+    }
+    .materia.activa {
+      opacity: 1;
+      border-color: var(--rosa-oscuro);
+      box-shadow: 0 2px 7px rgba(233,143,201,0.09);
+    }
+    .materia.tachada {
+      background: var(--tachado);
+      text-decoration: line-through;
+      color: #fff;
+      opacity: 0.6;
+    }
+    .materia .creditos {
+      font-size: 0.85em;
+      color: var(--rosa-oscuro);
+      position: absolute;
+      right: 18px;
+      top: 12px;
+    }
+    @media (max-width: 900px) {
+      .malla-container {
+        flex-direction: column;
+        align-items: center;
+      }
+      .semestre {
+        width: 95%;
+        max-width: 370px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Malla Interactiva Ingeniería Civil</h1>
+  <div id="malla" class="malla-container"></div>
+  <footer style="text-align:center; margin: 40px 0 10px 0; color: var(--rosa-oscuro); font-size:1em;">
+    <p>Malla creada por carol790-hue &copy; 2025</p>
+  </footer>
+  <script>
+    // Definición de materias y dependencias
+    const malla = [
+      {
+        nombre: "I",
+        materias: [
+          { id: "esp", nombre: "Español", creditos: 3 },
+          { id: "soc", nombre: "Sociología", creditos: 3 },
+          { id: "mat", nombre: "Matemáticas", creditos: 3 },
+          { id: "dib1", nombre: "Dibujo I", creditos: 3 },
+          { id: "fil", nombre: "Filosofía", creditos: 3 },
+          { id: "vida", nombre: "El Hombre Frente a La Vida", creditos: 3 }
+        ]
+      },
+      {
+        nombre: "II",
+        materias: [
+          { id: "exp", nombre: "Expresión Oral y Escrita", creditos: 3, deps: ["esp"] },
+          { id: "fis1", nombre: "Física I", creditos: 4, deps: ["mat"] },
+          { id: "prec", nombre: "Pre-Cálculo", creditos: 4, deps: ["mat"] },
+          { id: "dibtec", nombre: "Dibujo Técnico", creditos: 4, deps: ["dib1"] }
+        ]
+      },
+      {
+        nombre: "III",
+        materias: [
+          { id: "est", nombre: "Estática", creditos: 3, deps: ["fis1", "prec"] },
+          { id: "din", nombre: "Dinámica", creditos: 3, deps: ["fis1", "prec"] },
+          { id: "calc1", nombre: "Cálculo I", creditos: 4, deps: ["prec"] },
+          { id: "algl", nombre: "Álgebra Lineal", creditos: 3, deps: ["mat"] },
+          { id: "topo", nombre: "Topografía", creditos: 3, deps: ["dibtec"] }
+        ]
+      },
+      {
+        nombre: "IV",
+        materias: [
+          { id: "mecsol1", nombre: "Mecánica de Sólidos I", creditos: 3, deps: ["est"] },
+          { id: "fis2", nombre: "Física II", creditos: 4, deps: ["fis1"] },
+          { id: "calc2", nombre: "Cálculo II", creditos: 4, deps: ["calc1"] },
+          { id: "mecflu", nombre: "Mecánica de Fluidos", creditos: 3, deps: ["din"] },
+          { id: "topoap", nombre: "Topografía Aplicada", creditos: 3, deps: ["topo"] }
+        ]
+      },
+      {
+        nombre: "V",
+        materias: [
+          { id: "matcon", nombre: "Materiales y Procesos de Construcción", creditos: 4, deps: ["mecsol1"] },
+          { id: "analest1", nombre: "Análisis Estructural I", creditos: 3, deps: ["mecsol1"] },
+          { id: "ecudif", nombre: "Ecuaciones Diferenciales", creditos: 4, deps: ["calc2"] },
+          { id: "estad1", nombre: "Estadística I", creditos: 3, deps: ["calc2"] },
+          { id: "hidro", nombre: "Hidrología", creditos: 3, deps: ["mecflu"] }
+        ]
+      },
+      {
+        nombre: "VI",
+        materias: [
+          { id: "metmaq", nombre: "Métodos y Maquinaria de Construcción", creditos: 3, deps: ["matcon"] },
+          { id: "analest2", nombre: "Análisis Estructural II", creditos: 4, deps: ["analest1"] },
+          { id: "elec1", nombre: "Electiva I Área Arte o Deporte", creditos: 3 },
+          { id: "inghidr", nombre: "Ingeniería Hidráulica y de Riesgos", creditos: 4, deps: ["hidro"] },
+          { id: "etica", nombre: "Ética Profesional", creditos: 3 }
+        ]
+      },
+      {
+        nombre: "VII",
+        materias: [
+          { id: "mecsol2", nombre: "Mecánica de Sólidos II", creditos: 3, deps: ["mecsol1"] },
+          { id: "analest3", nombre: "Análisis Estructural III", creditos: 4, deps: ["analest2"] },
+          { id: "hist", nombre: "Historia de Honduras", creditos: 3 },
+          { id: "mecsuelo", nombre: "Mecánica de Suelos", creditos: 4, deps: ["mecsol2"] },
+          { id: "elec2", nombre: "Electiva II Área Ciencias Naturales", creditos: 3 }
+        ]
+      },
+      {
+        nombre: "VIII",
+        materias: [
+          { id: "seminv", nombre: "Seminario de Investigación", creditos: 3 },
+          { id: "concreto", nombre: "Concreto", creditos: 4, deps: ["matcon"] },
+          { id: "geotec", nombre: "Geotecnia", creditos: 4, deps: ["mecsuelo"] },
+          { id: "ingsani1", nombre: "Ingeniería Sanitaria I", creditos: 3 },
+          { id: "gestioncal", nombre: "Gestión de la Calidad Total", creditos: 3 }
+        ]
+      },
+      {
+        nombre: "IX",
+        materias: [
+          { id: "ingecon", nombre: "Ingeniería Económica", creditos: 3 },
+          { id: "disconcreto", nombre: "Diseño de Estructuras de Concreto", creditos: 4, deps: ["concreto"] },
+          { id: "diseocim", nombre: "Diseño de Cimentaciones", creditos: 4, deps: ["geotec"] },
+          { id: "diseocarre", nombre: "Diseño de Carreteras y Caminos", creditos: 4 },
+          { id: "controlcal", nombre: "Control Estadístico de la Calidad", creditos: 3 }
+        ]
+      },
+      {
+        nombre: "X",
+        materias: [
+          { id: "asplegal", nombre: "Aspectos Legales de la Ingeniería Civil", creditos: 3 },
+          { id: "dispav", nombre: "Diseño de Pavimentos", creditos: 4 },
+          { id: "disestmet", nombre: "Diseño de Estructuras Metálicas", creditos: 4 },
+          { id: "ingsani2", nombre: "Ingeniería Sanitaria II", creditos: 3, deps: ["ingsani1"] },
+          { id: "doctrina", nombre: "Doctrina Social de la Iglesia", creditos: 3 }
+        ]
+      },
+      {
+        nombre: "XI",
+        materias: [
+          { id: "costos", nombre: "Costos y Presupuesto de Obras", creditos: 4 },
+          { id: "elec3", nombre: "Electiva III Área Institucionales", creditos: 3 },
+          { id: "mitig", nombre: "Obras de Mitigación", creditos: 3 },
+          { id: "diseoinstal", nombre: "Diseño de Instalaciones Eléctricas", creditos: 4 },
+          { id: "diseoasist", nombre: "Diseño de Obras Civiles Asistido por Computadora", creditos: 4 }
+        ]
+      },
+      {
+        nombre: "XII",
+        materias: [
+          { id: "formulacion", nombre: "Formulación y Evaluación de Proyectos de Construcción", creditos: 3 },
+          { id: "dispuentes", nombre: "Diseño de Puentes", creditos: 4 },
+          { id: "taller", nombre: "Taller de Diseño Combinado", creditos: 4 },
+          { id: "diseourb", nombre: "Diseño de Urbanizaciones", creditos: 4 },
+          { id: "planeacion", nombre: "Planeación y Diseño de un Modelo de Calidad", creditos: 3 }
+        ]
+      },
+      {
+        nombre: "XIII",
+        materias: [
+          { id: "practica", nombre: "Práctica Profesional Supervisada", creditos: 4 }
+        ]
+      }
+    ];
+
+    // Estado de materias (tachadas/completadas)
+    let estadoMaterias = {};
+
+    // Inicializa materias activas del primer semestre
+    function materiasActivas() {
+      // Una materia está activa si todos sus deps están tachados/completados o no tiene deps
+      let activas = {};
+      malla.forEach(sem => {
+        sem.materias.forEach(mat => {
+          if (estadoMaterias[mat.id]) return; // ya tachada
+          if (!mat.deps || mat.deps.length === 0) {
+            activas[mat.id] = true;
+          } else {
+            // Solo activa si todos sus deps están tachados
+            let depsListas = mat.deps.every(did => estadoMaterias[did]);
+            if (depsListas) activas[mat.id] = true;
+          }
+        });
+      });
+      return activas;
+    }
+
+    function renderMalla() {
+      const container = document.getElementById("malla");
+      container.innerHTML = "";
+      const activas = materiasActivas();
+
+      malla.forEach(sem => {
+        const divSem = document.createElement("div");
+        divSem.className = "semestre";
+
+        const semTitle = document.createElement("div");
+        semTitle.className = "semestre-title";
+        semTitle.textContent = sem.nombre + " Semestre";
+        divSem.appendChild(semTitle);
+
+        sem.materias.forEach(mat => {
+          const divMat = document.createElement("div");
+          divMat.className = "materia";
+          divMat.innerHTML = `
+            ${mat.nombre}
+            <span class="creditos">${mat.creditos} Créditos</span>
+          `;
+          // Estado visual
+          if (estadoMaterias[mat.id]) {
+            divMat.classList.add("tachada");
+            divMat.title = "Materia completada";
+          } else if (activas[mat.id]) {
+            divMat.classList.add("activa");
+            divMat.title = "Haz clic para marcar como completada";
+            divMat.onclick = () => {
+              estadoMaterias[mat.id] = true;
+              renderMalla();
+            };
+          } else {
+            divMat.style.opacity = "0.4";
+            divMat.style.pointerEvents = "none";
+            divMat.title = mat.deps && mat.deps.length ? "Primero completa las materias previas" : "";
+          }
+          divSem.appendChild(divMat);
+        });
+
+        container.appendChild(divSem);
+      });
+    }
+
+    renderMalla();
+  </script>
+</body>
+</html>
